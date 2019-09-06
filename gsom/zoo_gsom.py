@@ -8,6 +8,8 @@ sys.path.append('../../')
 import data_parser as Parser
 from util import utilities as Utils
 from util import display as Display_Utils
+from util.kmeans_cluster import KMeansSOM
+from util.FrameSeperator import FrameSeperator
 
 from params import params as Params
 from core4 import core_controller as Core
@@ -17,7 +19,7 @@ from core4 import core_controller as Core
 SF = 0.83
 forget_threshold = 80  # To include forgetting, threshold should be < learning iterations.
 temporal_contexts = 1  # If stationary data - keep this at 1
-learning_itr = 5
+learning_itr = 20
 smoothing_irt = 5
 plot_for_itr = 4  # Unused parameter - just for visualization. Keep this as it is.
 
@@ -60,7 +62,7 @@ if __name__ == '__main__':
 
         # Setup the age threshold based on the input vector length
         generalise_params.setup_age_threshold(input_vector_database[0].shape[0])
-
+        kmeans_cluster = KMeansSOM()
         # Process the clustering algorithm algorithm
         controller = Core.Controller(generalise_params)
         controller_start = time.time()
@@ -69,6 +71,11 @@ if __name__ == '__main__':
         saved_name = Utils.Utilities.save_object(result_dict, join(output_loc, 'gsom_nodemap_SF-{}'.format(SF)))
 
         gsom_nodemap = result_dict[0]['gsom']
+        clusters = kmeans_cluster.cluster_GSOM(gsom_nodemap,3)
+
+        frame_seperator = FrameSeperator()
+
+        labeled_clusteres = frame_seperator.seperate_frames(gsom_nodemap,clusters,labels)
 
         # Display
         display = Display_Utils.Display(result_dict[0]['gsom'], None)

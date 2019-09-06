@@ -1,4 +1,5 @@
 from sklearn.cluster import k_means
+import numpy as np
 
 
 class KMeansSOM:
@@ -39,9 +40,10 @@ class KMeansSOM:
 
     def _gsom_to_array(self, gsom_map):
         gsom_map_array = []
-        for key, node in gsom_map.items():
-            gsom_map_array.append(node.weights)
-        return gsom_map_array
+        for node in gsom_map.items():
+            gsom_map_array.append(node[1].recurrent_weights)
+        gsom_array = np.asarray(gsom_map_array).reshape((len(gsom_map_array)),len(gsom_map_array[0][0]))
+        return gsom_array
 
     def cluster_GSOM(self, gsom_map, n_clusters=2):
         """
@@ -67,5 +69,16 @@ class KMeansSOM:
 
         centroids = clf[0]
         labels = clf[1]
+        clusters = self.seperate_clusters(labels,n_clusters)
+        return clusters
 
-        return gsom_list, centroids, labels
+    # seperate nodes into seperate clusters
+    def seperate_clusters(self, nodes, number_of_clusters):
+        clusters = {}
+        for i in range (number_of_clusters):
+            clusters[i] = []
+
+        for val,cluster in enumerate(nodes):
+            clusters[cluster].append(val)
+
+        return clusters
